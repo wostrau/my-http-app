@@ -1,15 +1,26 @@
 const listElement = document.querySelector('.posts');
 const postTemplate = document.getElementById('single-post');
+const form = document.querySelector('#new-post form');
+const fetchButton = document.querySelector('#available-posts button');
+const postList = document.querySelector('ul');
 
-const xhr = new XMLHttpRequest();
+const pageUrl = 'https://jsonplaceholder.typicode.com/posts';
 
-xhr.open('GET', 'https://jsonplaceholder.typicode.com/posts');
+const sendHttpRequest = (method, url, data = null) => {
+    const promise = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        xhr.responseType = 'json';
+        xhr.onload = () => resolve(xhr.response);
+        xhr.send(JSON.stringify(data));
+    });
 
-xhr.responseType = 'json';
+    return promise;
+};
 
-xhr.onload = () => {
-    // const listIfPosts = JSON.parse(xhr.response);
-    const listIfPosts = xhr.response;
+const fetchPosts = async () => {
+    const responseData = await sendHttpRequest('GET', pageUrl);
+    const listIfPosts = responseData;
 
     for (const post of listIfPosts) {
         const postEl = document.importNode(postTemplate.content, true);
@@ -19,4 +30,35 @@ xhr.onload = () => {
     }
 };
 
-xhr.send();
+const createPost = (title, content) => {
+    const userId = Math.random();
+    const post = {
+        title: title,
+        body: content,
+        userId: userId
+    };
+
+    sendHttpRequest('POST', pageUrl, post);
+};
+
+
+fetchButton.addEventListener('click', fetchPosts);
+
+form.addEventListener('submit', event => {
+    event.preventDefault();
+
+    const enteredTitle = event.currentTarget.querySelector('#title').value;
+    const enteredContent = event.currentTarget.querySelector('#content').value;
+
+    createPost(enteredTitle, enteredContent);
+});
+
+postList.addEventListener('click', event => {
+    if (event.target.tagName === 'BUTTON') {
+        const postId = event.target.closest('li').id;
+        sendHttpRequest('DELETE', `${pageUrl}/${postId}`);
+    }
+});
+
+
+
