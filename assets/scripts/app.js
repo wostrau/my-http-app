@@ -52,8 +52,9 @@ const sendHttpRequest = (method, url, data) => {
 
 const fetchPosts = async () => {
     try {
-        const responseData = await sendHttpRequest('GET', pageUrl);
-        const listIfPosts = responseData;
+        // const responseData = await sendHttpRequest('GET', pageUrl);
+        const responseData = await axios.get(pageUrl);
+        const listIfPosts = responseData.data;
 
         for (const post of listIfPosts) {
             const postEl = document.importNode(postTemplate.content, true);
@@ -67,21 +68,22 @@ const fetchPosts = async () => {
     }
 };
 
-const createPost = (title, content) => {
+const createPost = async (title, content) => {
     const userId = Math.random();
-    // const post = {
-    //     title: title,
-    //     body: content,
-    //     userId: userId
-    // };
+    const post = {
+        title: title,
+        body: content,
+        userId: userId
+    };
 
-    const formData = new FormData(form);
+    // const formData = new FormData(form);
     // formData.append('title', title);
     // formData.append('body', content);
     // formData.append('userId', userId);
     formData.append('userId', userId);
 
-    sendHttpRequest('POST', pageUrl, formData);
+    // sendHttpRequest('POST', pageUrl, formData);
+    const response = await axios.post(pageUrl, post);
 };
 
 
@@ -99,7 +101,8 @@ form.addEventListener('submit', event => {
 postList.addEventListener('click', event => {
     if (event.target.tagName === 'BUTTON') {
         const postId = event.target.closest('li').id;
-        sendHttpRequest('DELETE', `${pageUrl}/${postId}`);
+        // sendHttpRequest('DELETE', `${pageUrl}/${postId}`);
+        axios.delete(`${pageUrl}/${postId}`);
     }
 });
 
